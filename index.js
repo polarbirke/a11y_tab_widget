@@ -64,6 +64,22 @@ var util = {
 
   getUrlHash: function () {
     return window.location.hash.replace('#', '');
+  },
+
+  /**
+   * Use history.replaceState so clicking through Tabs
+   * does not create dozens of new history entries.
+   * Browser back should navigate to the previous page
+   * regardless of how many Tabs were activated.
+   *
+   * @param {string} hash
+   */
+  setUrlHash: function( hash ) {
+    if ( history.replaceState ) {
+      history.replaceState(null, '', '#' + hash);
+    } else {
+      location.hash = hash;
+    }
   }
 };
 
@@ -184,6 +200,7 @@ var util = {
         newTab.addEventListener('click', function () {
           onClick.call( this, index );
           this.focus();
+          updateUrlHash();
         }, false);
 
         newTab.addEventListener('keydown', tabElementPress.bind(this), false);
@@ -333,6 +350,7 @@ var util = {
 
       if ( !_options.manual ) {
         activateTab();
+        updateUrlHash();
       }
     }; // moveBack()
 
@@ -344,6 +362,7 @@ var util = {
 
       if ( !_options.manual ) {
         activateTab();
+        updateUrlHash();
       }
     }; // moveNext()
 
@@ -386,6 +405,7 @@ var util = {
         case util.keyCodes.SPACE:
           e.preventDefault();
           activateTab();
+          updateUrlHash();
           break;
 
         case util.keyCodes.LEFT:
@@ -404,6 +424,7 @@ var util = {
           focusActiveTab();
           if ( !_options.manual ) {
             activateTab();
+            updateUrlHash();
           }
           break;
 
@@ -413,6 +434,7 @@ var util = {
           focusActiveTab();
           if ( !_options.manual ) {
             activateTab();
+            updateUrlHash();
           }
           break;
 
@@ -486,6 +508,15 @@ var util = {
       selectedTab = activeIndex;
       return selectedTab;
     }; // activateTab()
+
+
+    /**
+     * Update URL Hash so direct link to the currently open Tab is exposed for copy & paste.
+     */
+    var updateUrlHash = function () {
+      var active = _tabs[activeIndex];
+      util.setUrlHash(active.tab.getAttribute('data-controls'));
+    }; // updateUrlHash()
 
 
     init.call( this );
